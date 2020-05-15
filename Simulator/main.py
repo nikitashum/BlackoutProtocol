@@ -32,7 +32,7 @@ firstSend = True
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption('Demo')
 clock = pygame.time.Clock()
-carImg = pygame.image.load('racecar.png')
+carImg = pygame.image.load('Simulator/racecar.png')
 pause = False
 
 try:

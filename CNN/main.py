@@ -113,13 +113,13 @@ def sendResult(result):
 
 
 mainLoop = True
-prototxtPath = "face_detector/deploy.prototxt"
-weightsPath = "face_detector/res10_300x300_ssd_iter_140000.caffemodel"  # Face recognition model
+prototxtPath = "CNN/face_detector/deploy.prototxt"
+weightsPath = "CNN/face_detector/res10_300x300_ssd_iter_140000.caffemodel"  # Face recognition model
 faceNet = cv2.dnn.readNet(prototxtPath, weightsPath)
 
-model = tf.keras.models.load_model('10-conv-50-nodes-1-dense1589459059')  # Input trained CNN model here
+model = tf.keras.models.load_model('CNN/10-conv-50-nodes-1-dense1589459059')  # Input trained CNN model here
 
-DEFAULT = "images/Normal/22b.jpg"  # Default image (Normal)
+DEFAULT = "CNN/images/Normal/22b.jpg"  # Default image (Normal)
 
 frame = cv2.imread(DEFAULT)
 
@@ -130,11 +130,11 @@ while mainLoop:
 
 
     def distracted():
-        return cv2.imread("images/Distracted/images1.jpg")  # Distracted
+        return cv2.imread("CNN/images/Distracted/images1.jpg")  # Distracted
 
 
     def tired():
-        return cv2.imread("images/Tired/images7.jpg")  # Tired face
+        return cv2.imread("CNN/images/Tired/images7.jpg")  # Tired face
 
 
     def webcam():  # Webcam live feed
