@@ -76,11 +76,9 @@ def service_connection(key, mask):
                 else:
                     speed = int(dataInn)
                 seconds = round(seconds)
-                print(speed, seconds, situation)
                 result = dl.Chief_Danger_Acquisition_Officer(situation, seconds, speed)
                 result = round(result, 1)
                 sock.send(resultToByte(result))
-                print("Danger level: ", result)
         except Exception as e:
             print(e)
         time.sleep(0.5)

@@ -237,11 +237,10 @@ def game_loop():
             data = data.decode('utf-8')
             data = float(data)
             data = round(data)
-            print(data)
             processData(data)
         except Exception as i:
             continue
-        clock.tick(60)
+        clock.tick(30)
 
 
 game_intro()

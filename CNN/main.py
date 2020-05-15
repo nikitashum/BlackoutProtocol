@@ -5,8 +5,6 @@ import time
 import cv2
 import tensorflow as tf
 import socket
-import random
-import os
 
 
 TCP_IP = 'localhost'
@@ -103,7 +101,6 @@ def predict_case(frame, faceNet, model, minConf=0.5):
 def sendResult(result):
     for r in result:
         result = ("CNN" + str(r["cat"][2]))
-        print(result)
         resultInBytes = str(result).encode('utf-8')
         try:
             s.send(resultInBytes)
