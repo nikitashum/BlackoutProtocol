@@ -6,13 +6,14 @@ import cv2
 import tensorflow as tf
 import socket
 
-
+# socket settings
 TCP_IP = 'localhost'
 TCP_PORT = 5005
 BUFFER_SIZE = 1024
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+# establish socket connection
 try:
     s.connect((TCP_IP, TCP_PORT))
     print("Transmitting on: " + TCP_IP + ":" + str(TCP_PORT))
@@ -20,6 +21,7 @@ except Exception as e:
     print(e)
 
 
+# method for drawing a frame around face and displaying prediction
 def draw_frame(res, fra):
     # loop over the results
     for r in res:
@@ -35,6 +37,7 @@ def draw_frame(res, fra):
         return fra
 
 
+# method for predicting face and situation
 def predict_case(frame, faceNet, model, minConf=0.5):
     # define the list of categories
     CATEGORIES = ['Normal', 'Distracted', 'Tired']
@@ -42,8 +45,7 @@ def predict_case(frame, faceNet, model, minConf=0.5):
     # initialize our results list
     results = []
 
-    # grab the dimensions of the frame and then construct a blob
-    # from it
+    # grab the dimensions of the frame and then construct a blob from it
     (h, w) = frame.shape[:2]
     blob = cv2.dnn.blobFromImage(frame, 1.0, (300, 300),
                                  (104.0, 177.0, 123.0))
@@ -54,15 +56,13 @@ def predict_case(frame, faceNet, model, minConf=0.5):
 
     # loop over the detections
     for i in range(0, detections.shape[2]):
-        # extract the confidence (i.e., probability) associated with
-        # the prediction
+        # extract the confidence (i.e., probability) associated with the prediction
         confidence = detections[0, 0, i, 2]
 
         # filter out weak detections by ensuring the confidence is
         # greater than the minimum confidence
         if confidence > minConf:
-            # compute the (x, y)-coordinates of the bounding box for
-            # the object
+            # compute the (x, y)-coordinates of the bounding box for teh object
             box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
             (startX, startY, endX, endY) = box.astype("int")
 
@@ -78,15 +78,15 @@ def predict_case(frame, faceNet, model, minConf=0.5):
                                              (78.4263377603, 87.7689143744, 114.895847746),
                                              swapRB=False)
 
-            # make predictions on the age and find the age bucket with
-            # the largest corresponding probability
+            # make predictions on the situation and
+            # output the largest corresponding probability
             preds = model.predict(faceBlob)
             i = preds[0].argmax()
             cat = CATEGORIES[i]
             confidence = preds[0][i]
 
             # construct a dictionary consisting of both the face
-            # bounding box location along with the age prediction,
+            # bounding box location along with the situation prediction,
             # then update our results list
             d = {
                 "loc": (startX, startY, endX, endY),
@@ -98,6 +98,7 @@ def predict_case(frame, faceNet, model, minConf=0.5):
     return results
 
 
+# method for encoding result to bytes and sending it over TCP socket
 def sendResult(result):
     for r in result:
         result = ("CNN" + str(r["cat"][2]))
@@ -109,35 +110,37 @@ def sendResult(result):
         return
 
 
+# main variables
 mainLoop = True
 prototxtPath = "CNN/face_detector/deploy.prototxt"
 weightsPath = "CNN/face_detector/res10_300x300_ssd_iter_140000.caffemodel"  # Face recognition model
 faceNet = cv2.dnn.readNet(prototxtPath, weightsPath)
-
-model = tf.keras.models.load_model('CNN/10-conv-50-nodes-1-dense1589459059')  # Input trained CNN model here
-
+# trained cnn model made by BlackoutProtocol team
+model = tf.keras.models.load_model('CNN/10-conv-50-nodes-1-dense1589459059')
 DEFAULT = "CNN/images/Normal/22b.jpg"  # Default image (Normal)
+frame = cv2.imread(DEFAULT)  # init frame with default image
 
-frame = cv2.imread(DEFAULT)
-
+# main loop
 while mainLoop:
 
+    # method for displaying normal situation
     def normal():
         return cv2.imread(DEFAULT)  # Normal face expression
 
-
+    # method for displaying distracted situation
     def distracted():
         return cv2.imread("CNN/images/Distracted/images1.jpg")  # Distracted
 
-
+    # method for displaying tired situation
     def tired():
         return cv2.imread("CNN/images/Tired/images7.jpg")  # Tired face
 
-
+    # method for starting and displaying webcam feed
     def webcam():  # Webcam live feed
         innerLoop = True
         # initialize the video stream
         vs = VideoStream(src=0).start()
+        # warm video sensors
         time.sleep(2.0)
 
         # loop over the frames from the video stream
@@ -149,7 +152,7 @@ while mainLoop:
             # to have a maximum width of 400 pixels
             frame = vs.read()
             frame = imutils.resize(frame, width=400)
-            # detect faces in the frame, and for each face in the frame,
+            # detect faces in the frame, and for each face in the frame
             results = predict_case(frame, faceNet, model)
             # transmit result
             sendResult(results)
@@ -159,15 +162,16 @@ while mainLoop:
             try:
                 cv2.imshow("Frame", newFrame)
             except Exception as e:
+                # show webcam frame if no face detected
                 cv2.imshow("Frame", frame)
             key = cv2.waitKey(1) & 0xFF
-            # if the `q` key was pressed, break from the loop
+            # if the `q` key was pressed, break from the loop and turn of camera
             if key == ord("q"):
                 innerLoop = False
                 vs.stop()
         return cv2.imread(DEFAULT)  # Switch back to default image
 
-
+    # switch case for switching situation
     def switch(i):
         switcher = {
             0: normal,
@@ -178,17 +182,18 @@ while mainLoop:
         func = switcher.get(i, lambda: 'Invalid')
         return func()
 
-
+    # resize frame to have a maximum width of 400 pixels
     frame = imutils.resize(frame, width=400)
-    # detect faces in the frame, and for each face in the frame,
+    # detect faces in the frame, and for each face in the frame
     results = predict_case(frame, faceNet, model)
-    # transmit result
+    # transmit result over TCP socket
     sendResult(results)
     # draw the box around the face and display prediction
     frame = draw_frame(results, frame)
     # show the output frame
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(0) & 0xFF
+    # keyboard controls for switch case
     if key == ord("w"):
         frame = switch(1)
 

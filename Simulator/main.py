@@ -2,12 +2,15 @@ import pygame
 import random
 import socket
 
+# socket settings
 TCP_IP = 'localhost'
 TCP_PORT = 5005
 BUFFER_SIZE = 1024
 
+# pygame initializer
 pygame.init()
 
+# global variables
 display_width = 800
 display_height = 600
 
@@ -35,6 +38,7 @@ clock = pygame.time.Clock()
 carImg = pygame.image.load('Simulator/racecar.png')
 pause = False
 
+# try to connect to system over TCP socket
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((TCP_IP, TCP_PORT))
@@ -43,6 +47,7 @@ except Exception as e:
     print(e)
 
 
+# method for encoding result to bytes and sending it over socket if value has changed or its a first sending
 def sendSpeed(speed):
     global currentSpeed
     global firstSend
@@ -59,18 +64,21 @@ def sendSpeed(speed):
         return
 
 
+# increase speed of the car by i
 def speedIncreas(i):
     global thing_speed
     if thing_speed < 10:
         thing_speed = thing_speed + i
 
 
+# decrease speed of the car by i
 def speedDecreas(i):
     global thing_speed
     if thing_speed > 0:
         thing_speed = thing_speed - i
 
 
+# simple decision making data = danger level received from system
 def processData(data):
     if data > 4:
         speedDecreas(1)
@@ -82,20 +90,24 @@ def processData(data):
         return
 
 
+# method to draw blue rectangles to display movement
 def things(thingx, thingy, thingw, thingh, color):
     pygame.draw.rect(gameDisplay, color, [thingx, thingy, thingw, thingh])
 
 
+# method to display current speed
 def currentSpeedText(count):
     font = pygame.font.SysFont("Arial", 25)
     text = font.render("Speed: " + str(count), True, black)
     gameDisplay.blit(text, (0, 0))
 
 
+# method to display car
 def car(x, y):
     gameDisplay.blit(carImg, (x, y))
 
 
+# method to draw text on the buttons
 def text_objects(text, font):
     textSurface = font.render(text, True, black)
     return textSurface, textSurface.get_rect()
@@ -108,6 +120,7 @@ def text_objects(text, font):
                 quit()
 
 
+# method to display buttons
 def button(msg, x, y, w, h, ic, ac, action=None):
     mouse = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
@@ -124,17 +137,20 @@ def button(msg, x, y, w, h, ic, ac, action=None):
     gameDisplay.blit(textSurf, textRect)
 
 
+# method for quiting the simulator
 def quitgame():
     s.close()
     pygame.quit()
     quit()
 
 
+# method to unpause simulator
 def unpause():
     global pause
     pause = False
 
 
+# method to pause simulator
 def paused():
     largeText = pygame.font.SysFont("arial", 115)
     TextSurf, TextRect = text_objects("Paused", largeText)
@@ -155,6 +171,7 @@ def paused():
         clock.tick(15)
 
 
+# method for creating main menu of the simulator
 def game_intro():
     intro = True
 
@@ -235,8 +252,7 @@ def game_loop():
         try:
             data = s.recv(1024)
             data = data.decode('utf-8')
-            data = float(data)
-            data = round(data)
+            data = round(float(data))
             processData(data)
         except Exception as i:
             continue
