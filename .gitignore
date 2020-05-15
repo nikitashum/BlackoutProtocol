@@ -1,0 +1,8 @@
+
+.idea/
+
+CNN/logs/
+
+__pycache__/
+
+*.iml
