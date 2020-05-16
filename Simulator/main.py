@@ -30,6 +30,8 @@ car_width = 73
 currentSpeed = 0
 thing_speed = 0
 
+currentDanger = 0
+
 firstSend = True
 
 gameDisplay = pygame.display.set_mode((display_width, display_height))
@@ -80,6 +82,8 @@ def speedDecreas(i):
 
 # simple decision making data = danger level received from system
 def processData(data):
+    global currentDanger
+    currentDanger = data
     if data > 4:
         speedDecreas(1)
     elif data > 6:
@@ -95,11 +99,15 @@ def things(thingx, thingy, thingw, thingh, color):
     pygame.draw.rect(gameDisplay, color, [thingx, thingy, thingw, thingh])
 
 
-# method to display current speed
-def currentSpeedText(count):
+# method to update display for speed and danger level
+def updateText():
+    global currentDanger
+    global currentSpeed
     font = pygame.font.SysFont("Arial", 25)
-    text = font.render("Speed: " + str(count), True, black)
-    gameDisplay.blit(text, (0, 0))
+    speed = font.render("Speed: " + str(currentSpeed), True, black)
+    danger = font.render("Danger level: " + str(currentDanger), True, black)
+    gameDisplay.blit(speed, (0, 0))
+    gameDisplay.blit(danger, (0, 20))
 
 
 # method to display car
@@ -195,14 +203,17 @@ def game_intro():
         clock.tick(15)
 
 
+# main loop of the simulator
 def game_loop():
+    # scrren size variables
     x = (display_width * 0.45)
     y = (display_height * 0.8)
 
     x_change = 0
-    thing_startx = random.randrange(0, display_width)
+    # obstacle variables
+    thing_startx = 0
     thing_starty = -100
-    thing_width = 20
+    thing_width = display_width
     thing_height = 20
 
     gameExit = False
@@ -214,7 +225,7 @@ def game_loop():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-
+            # controls
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     x_change = -5
@@ -235,20 +246,18 @@ def game_loop():
 
         x += x_change
         gameDisplay.fill(white)
-
+        # create and move obstacle
         things(thing_startx, thing_starty, thing_width, thing_height, block_color)
         thing_starty += thing_speed
+        # create and update car position
         car(x, y)
-        currentSpeedText(thing_speed)
-
-        if thing_starty > display_height:
-            thing_starty = 0 - thing_height
-            thing_startx = random.randrange(0, display_width)
-
+        # update text displaying speed and danger level
+        updateText()
+        # update display
         pygame.display.update()
         # send current speed
         sendSpeed(thing_speed)
-        # receive command from system
+        # receive danger level from system
         try:
             data = s.recv(1024)
             data = data.decode('utf-8')
@@ -259,4 +268,5 @@ def game_loop():
         clock.tick(30)
 
 
+# starts simulator
 game_intro()
