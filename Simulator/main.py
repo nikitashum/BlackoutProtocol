@@ -80,7 +80,7 @@ def speedDecreas(i):
         thing_speed = thing_speed - i
 
 
-# simple decision making data = danger level received from system
+# simple decision making (data = danger level received from system)
 def processData(data):
     global currentDanger
     currentDanger = data
@@ -110,7 +110,7 @@ def updateText():
     gameDisplay.blit(danger, (0, 20))
 
 
-# method to display car
+# method to display car at (x, y) position
 def car(x, y):
     gameDisplay.blit(carImg, (x, y))
 

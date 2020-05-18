@@ -2,6 +2,13 @@ BLACKOUT PROTOCOL
 
 This is a bachelor thesis project by Nikita Sumahers and Hans Ivar Grønli
 
+To launch the program make sure all the dependencies are satisfied by executing
+following script in CMD:
+    
+    python -m pip install scikit-fuzzy opencv-python tensorflow numpy imutils
+
+If all the dependencies are satisfied execute Run.bat file to launch the system
+
 The idea of this system is to detect sleeping, unconscious or unaware drivers and prevent accidents
 The system takes the current image of the driver and acceleration of the vehicle as input
 calculates it with variable time and output a danger level, then it decides on action depending on variables and danger level

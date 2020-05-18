@@ -1,10 +1,6 @@
-# start of fuzzy logic
 import numpy as np
 import skfuzzy as fuzz
 from skfuzzy import control as ctrl
-
-# use "pip install -U scikit-fuzzy" to install skfuzzy
-# skfuzzy should be included with system anyway
 
 # changes from last version: DL 'none' removed, time 'low' narrowed from 5 to 3,
 # other "time" categories adjusted, speed 'none' removed,
